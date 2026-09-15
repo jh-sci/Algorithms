@@ -1,0 +1,131 @@
+
+# # Data Cube
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+
+
+
+
+def aggregate_by_year():
+    
+    # Reading dataset
+    df = pd.read_csv('./dataset/dataset.csv')
+    d = dict()
+    
+    # your code here
+    #aggregation
+    for index, row in df.iterrows():
+        year = row['year']
+        sales = row['sales']
+        if year in d:
+            d[year] += sales
+        else:
+            d[year] = sales
+
+    return d
+
+sales_by_year = aggregate_by_year()
+print(sales_by_year)
+
+
+def aggregate_by_country():
+    
+    
+    df = pd.read_csv('./dataset/dataset.csv')
+    d = dict()
+    
+    # your code here
+    for index, row in df.iterrows():
+        year = row['year']
+        sales = row['sales']
+
+        if year in d:
+            d[year] += sales
+        else:
+            d[year] = sales
+    return d
+
+
+
+
+def aggregate_by_category():
+    
+    # Reading dataset
+    df = pd.read_csv('./dataset/dataset.csv')
+    d = dict()
+    
+    # your code here
+    df_agg = df.groupby("category").agg(sales_per_category = ("sales","sum")).to_dict()
+    d = df_agg['sales_per_category']
+    return d
+
+
+
+
+# - Visualize the dataset in the form of a data cube where the year is on the x-axis, product category on the y-axis and aggregated sales is on the z-axis.
+# - Return your x, y and z values as python lists in the plot_data_cube function. 
+# - The ```plot_data_cube()``` function only needs to return the x, y and z values as python lists. It does not need to plot the 3D datacube, as this will be done in the next cell using these x, y and z values.
+# 
+# The final aggregated values may look something like:
+# 
+# | year | category    | totalsales |
+# |------|-------------|------------|
+# | 2015 | accessories |1116319     |
+# | 2015 | bikes       |1086039     |
+# | 2015 | clothing    |1087927     |
+# | 2015 | components  |1094879     |
+# | 2016 | accessories |1083479     |
+# | ...  | ...         |...         |
+# 
+# Aggregated sales for the specific example should be across all (5) years and all (4) product categories.
+
+
+def plot_data_cube(): 
+    '''
+    Output: x, y, z
+    '''
+    # Reading dataset
+    df = pd.read_csv("./dataset/dataset.csv")
+    
+    # your code here
+    #x,y,z axis 
+    x,y,z=[],[],[]
+    x = list(df['year'])
+    y = list(df['category'])
+    z = list(df['sales'])
+    #print(x)
+    print(len(y))
+    print(len(z))
+    return x,y,z
+    
+
+
+# ## The cell below can be used to test our datacube plot. You don't need to modify this. Simply execute the cell below and observe the output.
+# Once the ```plot_data_cube()``` function above has been completed we can test it by running the cell below. Running the cell below should simply output a scatter plot based on your ```plot_data_cube()``` function. Your scatter plot may not look exactly the same, but may look something like this:
+# 
+# ![datacube.png](attachment:datacube.png)
+
+# In[9]:
+
+
+
+x, y, z = plot_data_cube()
+y_codes = (list(pd.Categorical(y).codes)) # To use scatter3D() function we need to convert to categorical codes
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(projection='3d')
+ax.scatter(x,y_codes,z)
+
+plt.xticks(np.arange(min(x), max(x)+1, 1))
+plt.yticks(np.arange(min(y_codes), max(y_codes)+1, 1))
+ax.set_yticklabels(y)
+
+ax.set_xlabel('Year')
+ax.set_ylabel('Category')
+ax.set_zlabel('TotalSales')
+ax.set_title('Datacube: Aggregate Sales across year and category')
+plt.show() 
+

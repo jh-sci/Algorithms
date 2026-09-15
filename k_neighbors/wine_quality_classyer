@@ -1,0 +1,62 @@
+# pip install scikit-learn pandas numpy
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.pipeline import make_pipeline
+
+# ---- 1. Load a real dataset (178 wines, 13 chemical features, 3 cultivars) ----
+data = load_wine()
+X, y = data.data, data.target
+feature_names = data.feature_names
+
+print("Features used to classify each wine:")
+print(", ".join(feature_names))
+
+# ---- 2. Train / test split ----
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y
+)
+
+# ---- 3. Pipeline: scaling + k-NN bundled together ----
+# (a pipeline guarantees the scaler is fit only on training data — no leakage)
+model = make_pipeline(
+    StandardScaler(),
+    KNeighborsClassifier(n_neighbors=5, weights="distance")
+)
+model.fit(X_train, y_train)
+
+# ---- 4. Evaluate ----
+print(f"\nTest accuracy: {model.score(X_test, y_test):.3f}\n")
+print("Per-class performance:")
+print(classification_report(y_test, model.predict(X_test),
+                            target_names=data.target_names))
+print("Confusion matrix (rows=true, cols=predicted):")
+print(confusion_matrix(y_test, model.predict(X_test)))
+
+# ---- 5. Apply it: classify a brand-new wine sample ----
+# Take a real wine's measurements and pretend it just arrived from the lab
+new_wine = X_test[0].reshape(1, -1)
+predicted = model.predict(new_wine)[0]
+proba = model.predict_proba(new_wine)[0]
+
+print(f"\n--- Applying the model to a new sample ---")
+print(f"Predicted cultivar: {data.target_names[predicted]}")
+print("Confidence per class:",
+      {name: f"{p:.2f}" for name, p in zip(data.target_names, proba)})
+
+# ---- 6. Wrap it as a reusable function (how you'd actually 'apply' it) ----
+def classify_wine(measurements: dict):
+    """measurements: dict of {feature_name: value} for all 13 features."""
+    row = np.array([[measurements[f] for f in feature_names]])
+    label = model.predict(row)[0]
+    conf = model.predict_proba(row)[0].max()
+    return data.target_names[label], round(float(conf), 3)
+
+# Example call using the first test wine's real values
+example = dict(zip(feature_names, X_test[0]))
+label, confidence = classify_wine(example)
+print(f"\nclassify_wine() -> {label} (confidence {confidence})")

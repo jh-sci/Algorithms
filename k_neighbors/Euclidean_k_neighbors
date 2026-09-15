@@ -1,0 +1,26 @@
+# pip install scikit-learn
+from sklearn.neighbors import KNeighborsClassifier
+
+# Training data: [weight (grams), sweetness (1-10)]
+X = [
+    [150, 7],   # apple
+    [170, 6],   # apple
+    [140, 8],   # apple
+    [130, 7],   # apple
+    [200, 4],   # orange
+    [220, 3],   # orange
+    [190, 5],   # orange
+    [210, 4],   # orange
+]
+y = ["apple", "apple", "apple", "apple",
+     "orange", "orange", "orange", "orange"]
+
+# Train (k=3)
+model = KNeighborsClassifier(n_neighbors=3)
+model.fit(X, y)
+
+# Predict a new fruit: 160g, sweetness 7
+print(model.predict([[160, 7]]))   # -> ['apple']
+
+# Try another: 205g, sweetness 4
+print(model.predict([[205, 4]]))   # -> ['orange']

@@ -1,0 +1,29 @@
+from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+
+# Generate sample data with 4 clusters
+X_simple, _ = make_blobs(n_samples=300, centers=4, cluster_std=1.0, random_state=42)
+
+# Apply K-Means clustering with 4 clusters
+kmeans_simple = KMeans(n_clusters=4, random_state=42, n_init=10)
+labels_simple = kmeans_simple.fit_predict(X_simple)
+
+# Create a DataFrame to show cluster assignments
+df_simple = pd.DataFrame(X_simple, columns=['Feature 1', 'Feature 2'])
+df_simple['Cluster'] = labels_simple
+
+# Show the DataFrame
+import ace_tools as tools
+tools.display_dataframe_to_user(name="Simple Clustering Data", dataframe=df_simple)
+
+# Plot the clustering results
+plt.figure(figsize=(8, 6))
+plt.scatter(X_simple[:, 0], X_simple[:, 1], c=labels_simple, cmap='viridis', s=50, alpha=0.7)
+plt.scatter(kmeans_simple.cluster_centers_[:, 0], kmeans_simple.cluster_centers_[:, 1],
+            s=200, c='red', marker='X', label='Centroids')
+
+plt.title("Simple Clustering Example (K-Means)")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.legend()
+plt.show()

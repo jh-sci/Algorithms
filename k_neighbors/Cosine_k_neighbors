@@ -1,0 +1,31 @@
+# pip install scikit-learn
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.neighbors import KNeighborsClassifier
+
+# 1. Training data: short sentences, each labeled by topic
+texts = [
+    "cat dog pet animal",       # animals
+    "dog puppy pet cute",       # animals
+    "cat kitten animal fur",    # animals
+    "money bank invest cash",   # finance
+    "stock market bank money",  # finance
+    "invest cash profit bank",  # finance
+]
+labels = ["animals", "animals", "animals", "finance", "finance", "finance"]
+
+# 2. Turn the words into count vectors
+vectorizer = CountVectorizer()
+
+X = vectorizer.fit_transform(texts)
+
+# 3. k-NN using COSINE distance instead of Euclidean
+model = KNeighborsClassifier(n_neighbors=3, metric="cosine")
+model.fit(X, labels)
+
+# 4. Classify new sentences
+new_texts = ["puppy money finance", "bank quiet nerves"]
+X_new = vectorizer.transform(new_texts)
+predictions = model.predict(X_new)
+
+for sentence, label in zip(new_texts, predictions):
+    print(f"{sentence!r}  ->  {label}")
