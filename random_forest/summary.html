@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Forest — Complete Summary</title>
+<style>
+:root{--bg:#ffffff;--surface:#f8f9fa;--border:#e0e0e0;--border-strong:#bbb;--text:#1a1a1a;--text-sec:#666;--accent:#6a5acd;--teal:#1D9E75;--amber:#c48a00;--green:#1D9E75;--red:#d03050;--bg-accent:#f0eef8;--bg-success:#e8f5e9;--bg-warning:#fff8e1;--bg-danger:#fde8ec}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a2e;--surface:#252540;--border:#3a3a5c;--border-strong:#555;--text:#e8e8f0;--text-sec:#a0a0b8;--accent:#9d8df1;--teal:#3dd9a0;--amber:#f0c040;--green:#3dd9a0;--red:#f06080;--bg-accent:#2e2a50;--bg-success:#1a3a2a;--bg-warning:#3a3520;--bg-danger:#3a1a25}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);padding:24px;max-width:800px;margin:0 auto;line-height:1.6}
+h1{font-size:22px;font-weight:600;margin:0 0 24px;text-align:center}
+.section{border:1px solid var(--border);border-radius:12px;padding:16px;margin:0 0 16px}
+.section-title{font-size:15px;font-weight:600;color:var(--text);margin:0 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.card{flex:1;min-width:140px;border:1px solid var(--border);border-radius:8px;padding:12px}
+.card-title{font-size:13px;font-weight:600;color:var(--accent);margin:0 0 4px}
+.card-body{font-size:12.5px;color:var(--text-sec);line-height:1.6}
+.flow-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.flow-box{font-size:12px;padding:7px 14px;border-radius:6px;font-weight:600;text-align:center}
+.fb-gray{background:var(--surface);border:1px solid var(--border);color:var(--text)}
+.fb-teal{background:var(--bg-success);color:var(--teal)}
+.fb-amber{background:var(--bg-warning);color:var(--amber)}
+.fb-purple{background:var(--bg-accent);color:var(--accent)}
+.fb-green{background:var(--bg-success);color:var(--green)}
+.arrow-r{color:var(--text-sec);font-size:14px}
+.vs-row{display:flex;gap:10px;margin:8px 0;flex-wrap:wrap}
+.vs-box{flex:1;min-width:200px;border-radius:8px;padding:12px;font-size:12.5px;line-height:1.6}
+.vs-good{background:var(--bg-success);color:var(--teal)}
+.vs-bad{background:var(--bg-danger);color:var(--red)}
+.vs-accent{background:var(--bg-accent);color:var(--accent)}
+.key-label{font-size:12.5px;font-weight:600;color:var(--text);margin:0 0 4px}
+.note{font-size:12.5px;color:var(--text-sec);margin-bottom:10px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<h1>Random Forest — Complete Summary</h1>
+
+<div class="section">
+<div class="section-title">1. How a single tree works</div>
+<div class="flow-row">
+<div class="flow-box fb-gray">Training data</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-amber">Try every feature + cutoff</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-amber">Pick lowest Gini</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-amber">Split & repeat</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-green">Leaves = answers</div>
+</div>
+<div class="row" style="margin-top:12px">
+<div class="card"><div class="card-title">Gini impurity</div><div class="card-body">Measures how mixed a group is. 0 = pure (all one class). 0.5 = maximally mixed. The tree picks splits that drop Gini the most.</div></div>
+<div class="card"><div class="card-title">Leaf labels</div><div class="card-body">Decided by the training data — whichever class is the majority in that leaf becomes the label. No human chooses.</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">2. How the forest combines trees</div>
+<div class="flow-row">
+<div class="flow-box fb-gray">One dataset</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-teal">Random samples (rows)</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-teal">Random features (columns)</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-amber">Many diverse trees</div>
+<span class="arrow-r">→</span>
+<div class="flow-box fb-purple">Majority vote</div>
+</div>
+<div class="row" style="margin-top:12px">
+<div class="card"><div class="card-title">Bootstrap sampling</div><div class="card-body">Each tree trains on a different random draw of rows (with replacement). Some rows repeat, some are left out.</div></div>
+<div class="card"><div class="card-title">Feature subsets</div><div class="card-body">At each split, only a random handful of columns are offered. Forces trees down different paths.</div></div>
+<div class="card"><div class="card-title">Majority vote</div><div class="card-body">Each tree votes independently. The class with the most votes wins. For regression, the average is taken instead.</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">3. Training vs prediction — two separate phases</div>
+<div class="vs-row">
+<div class="vs-box vs-good">
+<div class="key-label">Training (model.fit)</div>
+Questions are generated. Branches are built. Cutoffs are chosen. All the learning happens here. Runs once.
+</div>
+<div class="vs-box vs-accent">
+<div class="key-label">Prediction (model.predict)</div>
+No new questions. No new branches. Data flows through the fixed tree and reads the leaf label. Purely mechanical.
+</div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">4. Parts of a tree</div>
+<div class="row">
+<div class="card"><div class="card-title">Root node</div><div class="card-body">First question. Chosen because it gives the biggest Gini drop across the whole dataset.</div></div>
+<div class="card"><div class="card-title">Branches</div><div class="card-body">Yes/no paths out of each question. Every node has exactly two.</div></div>
+<div class="card"><div class="card-title">Internal nodes</div><div class="card-body">Follow-up questions deeper in the tree. Same Gini logic, applied to the subset that arrived there.</div></div>
+<div class="card"><div class="card-title">Leaves</div><div class="card-body">Endpoints. No more splits. The label is the majority class. This is the tree's answer.</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">5. Key parameters</div>
+<div class="row">
+<div class="card"><div class="card-title">n_estimators</div><div class="card-body">Number of trees. More = better but slower. Can be auto-detected via OOB score. Usually 100–500.</div></div>
+<div class="card"><div class="card-title">max_depth</div><div class="card-body">How deep each tree can grow. Limits complexity and reduces overfitting.</div></div>
+<div class="card"><div class="card-title">max_features</div><div class="card-body">How many columns each split sees. Default √n for classification. Main source of tree diversity.</div></div>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">6. Why trees repeat questions — and why that's good</div>
+<div class="note">Trees are built independently — no communication. If one feature is dominant, most trees will use it. That's a feature, not a bug.</div>
+<div class="vs-row">
+<div class="vs-box vs-good">
+<div class="key-label">Standard forest (repeats allowed)</div>
+Strong features get used often. Every tree asks its best question. Diversity comes from bootstrap samples and deeper splits. In our test: 95% accuracy, 3 wrong.
+</div>
+<div class="vs-box vs-bad">
+<div class="key-label">Unique questions (forced diversity)</div>
+Pushes trees onto weak/noisy features. Bad trees outvote good ones. In our test: 67% accuracy, 20 wrong — 17 extra misdiagnoses.
+</div>
+</div>
+</div>
+
+</body>
+</html>
