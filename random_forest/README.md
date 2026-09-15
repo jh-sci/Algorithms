@@ -1,4 +1,4 @@
-# Random Forest — Complete Summary
+# Random Forest — Summary
 
 ## 1. What Is Random Forest?
 
